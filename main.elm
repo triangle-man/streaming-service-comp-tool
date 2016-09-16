@@ -9,8 +9,16 @@ main =
 
 -- MODEL
 
+-- A Movie is returned by the search and identifies a particular movie
 type alias Movie =
     { movieTitle : String, releaseYear: Int }
+
+-- A 
+type alias 
+    
+type alias MovieDetails =
+    { movie : Movie,
+      
 
 type alias Model =
     { movieTitle : String,             -- The title of the movie
@@ -23,10 +31,13 @@ model = Model "" []
 
 -- UPDATE
 
+{- A Msg is sent whenever: 
+   . The user searches for movies 
+   . The user adds a movie in the search results to the -}
+
 type Msg = Update String | Search  
 
 update : Msg -> Model -> Model
-         
 update msg model =
     case msg of
         Update newTitle ->
