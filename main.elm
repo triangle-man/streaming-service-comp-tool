@@ -2,6 +2,8 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.App as App
 import Html.Events exposing (onClick, onInput)
+import Dict
+import Random.PCG as Random -- A user-contributed RNG library
 
 main =
     App.beginnerProgram { model = model, view = view, update = update }
@@ -9,53 +11,81 @@ main =
 
 -- MODEL
 
--- A Movie is returned by the search and identifies a particular movie
-type alias Movie =
-    { movieTitle : String, releaseYear: Int }
+-- Type for representing a movies
 
--- A 
-type alias 
+type alias Movie =                -- (movie title, year of relase). Ought to be a
+     ( String, Int )              -- record, but Elm does not support records as
+                                  -- the keys in a Dict.
+moviename : Movie -> String
+moviename = fst
+
+movieyear : Movie -> Int
+movieyear = snd
     
-type alias MovieDetails =
-    { movie : Movie,
-      
+-- Types for representing the details of costs for movies
+
+type alias ProviderCost =
+    { streamCost : Float, rentCost : Float }
+    
+type alias Details =
+    { netflix : ProviderCost,     -- Yes, these should be in a list, but
+      amazon : ProviderCost,      -- then I would have to figure out how to put
+      hulu : ProviderCost,        -- them in a table 
+      vudu : ProviderCost,  
+      updated : Date
+    }
+
+-- Type for representing all data on the webpage
 
 type alias Model =
-    { movieTitle : String,             -- The title of the movie
-      movieList : List Movie           -- Movies looked up by title
+    { title   : String,                   -- Title of movie for search
+      movies  : List Movie                -- Movies returned by search
+      details : Dict Movie Details        -- Costs from each provider
     }
     
 model : Model
-model = Model "" []
+model = Model "" [] Dict.empty 
 
 
 -- UPDATE
 
-{- A Msg is sent whenever: 
-   . The user searches for movies 
-   . The user adds a movie in the search results to the -}
+{- The following actions are supported:
+   . The user enters text in the search box 
+   . The user clicks the "search" button 
+   . The user adds a movie in the search results to the list of stored details
+   . The user removes a movie from the list of stored details 
+   . The user refreshes the details of a particular movie 
+-}
 
-type Msg = Update String | Search  
+type Msg = Update String | Search | Add Movie | Remove Movie | Update Movie
 
 update : Msg -> Model -> Model
 update msg model =
     case msg of
-        Update newTitle ->
-            { model |                                 -- This is record update in Elm
-                  movieTitle = newTitle,
-                  movieList = findMovies newTitle 
-            }
+        Update seachTerm ->
+            { model |  title = searchTerm }  -- This is how you do record
+                                                -- update in Elm
         Search ->
-            model
+            { model | movies = findMovies model.title}
+        Add movie ->
+            { model | details = Dict.insert movie (getDetails movie) model.details }
+        Remove movie ->
+            { model | details = Dict.remove movie model.details }
+        Update movie ->
+            { model | details = Dict.insert movie (getDetails movie) model.details } 
 
+-- At present, findMovies just makes up a random list    
 findMovies : String -> List Movie
 findMovies title =
-    []
+    if []
     
 
 
 
 -- VIEW
+   
+-- The function view produces HTML (or a representation thereof). There is no
+-- separate index.html file.
 
 view : Model -> Html Msg
 view model =
